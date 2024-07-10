@@ -1,11 +1,4 @@
 dependencies:
-  arduino:
-    component_hash: c681b9f21326d67f647de1d587a97d1afe0154643271a3a0b2a0a9871fea98c9
-    source:
-      git: https://github.com/espressif/arduino-esp32.git
-      path: .
-      type: git
-    version: 4e3523c212375ef65256d09506ee89425dbf5958
   chmorgan/esp-libhelix-mp3:
     component_hash: cbb76089dc2c5749f7b470e2e70aedc44c9da519e04eb9a67d4c7ec275229e53
     source:
@@ -30,12 +23,6 @@ dependencies:
       service_url: https://api.components.espressif.com/
       type: service
     version: 1.0.15
-  espressif/esp-sr:
-    component_hash: 16af25295f531495fe7e36cf2e8c8bb49629be42c38a56f55f4ded825ada0ffc
-    source:
-      service_url: https://api.components.espressif.com/
-      type: service
-    version: 1.7.1
   espressif/esp-zboss-lib:
     component_hash: e7d9115c818aa19167958553c25013af194bf99035408a5a31cae972b946d129
     source:
@@ -138,11 +125,11 @@ dependencies:
       type: idf
     version: 5.1.4
   joltwallet/littlefs:
-    component_hash: 288d76bc1f2a46f5d61e364f27f92b6adbdb3dce687d03a72373bb0a2a995bf5
+    component_hash: 362f1f5beb5087b0c60169aff82676d2d0ffc991ead975212b0cba95959181c5
     source:
       service_url: https://api.components.espressif.com/
       type: service
-    version: 1.14.7
-manifest_hash: e986e14e8c9427ba2f3b9fa870d994be4dc426d0e566cd9fc541e9aecfc1c505
+    version: 1.14.8
+manifest_hash: 8cc110605bdb2276798f1eabcf0972eeae7d091be13ca2680190b0990a8f8933
 target: esp32h2
 version: 1.0.0

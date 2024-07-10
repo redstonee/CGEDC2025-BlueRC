@@ -1,4 +1,0 @@
-dependencies:
-    arduino:
-        git: https://github.com/espressif/arduino-esp32.git
-        version: "*"
