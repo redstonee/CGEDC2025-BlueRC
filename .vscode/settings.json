@@ -15,5 +15,14 @@
     "idf.toolsPathWin": "C:\\Users\\RedStoneeee\\.espressif",
     "idf.flashType": "UART",
     "idf.gitPathWin": "C:\\Users\\RedStoneeee\\.espressif\\tools\\idf-git\\2.39.2\\cmd\\git.exe",
-    "idf.portWin": "COM24"
+    "idf.portWin": "COM24",
+    "files.associations": {
+        "*.S": "arm",
+        "unordered_map": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "numeric": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp"
+    }
 }
