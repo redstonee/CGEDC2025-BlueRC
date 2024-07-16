@@ -4,26 +4,46 @@
 #include "esp_log.h"
 #include "Preferences.h"
 #include "esp_pm.h"
+#include "esp_adc/adc_oneshot.h"
 
 #include "pins.h"
 #include "blue.h"
-#include "anal.h"
 
 void collectDataTask(void *shit)
 {
-    anal::init();
+
+    adc_channel_t adcChannels[] = {ADC_CHANNEL_0, ADC_CHANNEL_1, ADC_CHANNEL_2, ADC_CHANNEL_3};
+
+    adc_oneshot_unit_handle_t adc1_handle;
+    adc_oneshot_unit_init_cfg_t adc_init_cfg = {
+        .unit_id = ADC_UNIT_1,
+
+    };
+    ESP_ERROR_CHECK(adc_oneshot_new_unit(&adc_init_cfg, &adc1_handle));
+    adc_oneshot_chan_cfg_t adc_ch_cfg = {
+        .atten = ADC_ATTEN_DB_12,
+        .bitwidth = ADC_BITWIDTH_12,
+    };
+
+    for (auto ch : adcChannels)
+    {
+        ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, ch, &adc_ch_cfg));
+    }
+
     while (1)
     {
-        vTaskDelay(pdTICKS_TO_MS(20));
+        vTaskDelay(20);
         if (!blue::isConnected())
             continue;
 
-        anal::start();
-        std::vector<uint8_t> analogValues(24);
-
-        while (!anal::read(&analogValues))
-            ;
-        anal::stop();
+        std::vector<uint8_t> analogValues{1, 14, 5, 14};
+        for (uint8_t i = 0; i < 2; i++)
+        {
+            int val;
+            ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, adcChannels[i], &val));
+            printf("Channel %d: %d\n", adcChannels[i], val);
+            analogValues[i] = (uint8_t)(val >> 4); // 10 bits raw data
+        }
         blue::send(analogValues);
     }
 }
