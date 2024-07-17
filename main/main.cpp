@@ -9,21 +9,9 @@
 #include "blue.h"
 #include "anal.h"
 
-static bool IRAM_ATTR sendData(adc_continuous_handle_t handle, const adc_continuous_evt_data_t *edata, void *user_data)
-{
-    std::vector<uint8_t> analogValues(24);
-
-    anal::read(&analogValues);
-    anal::stop();
-    return true;
-}
-
 void collectDataTask(void *shit)
 {
-    const auto colPins = static_cast<uint8_t *>(shit);
-
-    anal::init(sendData);
-
+    anal::init();
     while (1)
     {
         vTaskDelay(pdTICKS_TO_MS(20));
@@ -31,6 +19,12 @@ void collectDataTask(void *shit)
             continue;
 
         anal::start();
+        std::vector<uint8_t> analogValues(24);
+
+        while (!anal::read(&analogValues))
+            ;
+        anal::stop();
+        blue::send(analogValues);
     }
 }
 
@@ -38,7 +32,7 @@ extern "C" void app_main()
 {
     initArduino();
 
-    uint8_t colPins[] = {PIN_COL1, PIN_COL2, PIN_COL3, PIN_COL4, PIN_COL5, PIN_COL6};
+    static auto colPins = {PIN_COL1, PIN_COL2, PIN_COL3, PIN_COL4, PIN_COL5, PIN_COL6};
 
     for (auto p : colPins)
         pinMode(p, OUTPUT);
@@ -59,5 +53,5 @@ extern "C" void app_main()
 
     blue::init();
 
-    xTaskCreate(collectDataTask, "Collect data", 5000, colPins, 4, nullptr);
+    xTaskCreate(collectDataTask, "Collect data", 5000, &colPins, 4, nullptr);
 }
