@@ -11,19 +11,19 @@
 
 void collectDataTask(void *shit)
 {
-    anal::init();
     while (1)
     {
         vTaskDelay(pdTICKS_TO_MS(20));
         if (!blue::isConnected())
             continue;
 
-        anal::start();
+        analogContinuousStart();
         std::vector<uint8_t> analogValues(24);
 
-        while (!anal::read(&analogValues))
-            ;
-        anal::stop();
+        // Wait for ADC to wake this shit up
+        ulTaskNotifyTake(true, portMAX_DELAY);
+        anal::read(&analogValues);
+        analogContinuousStop();
         blue::send(analogValues);
     }
 }
@@ -53,5 +53,7 @@ extern "C" void app_main()
 
     blue::init();
 
-    xTaskCreate(collectDataTask, "Collect data", 5000, &colPins, 4, nullptr);
+    TaskHandle_t collectDataTaskHandle;
+    xTaskCreate(collectDataTask, "Collect data", 5000, &colPins, 4, &collectDataTaskHandle);
+    anal::init(collectDataTaskHandle);
 }
