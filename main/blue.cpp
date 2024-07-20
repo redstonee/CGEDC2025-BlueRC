@@ -11,9 +11,9 @@ namespace blue
     // See the following for generating UUIDs:
     // https://www.uuidgenerator.net/
 
-    constexpr auto SERVICE_UUID = "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"; // UART service UUID
-    constexpr auto CHARACTERISTIC_UUID_RX = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E";
-    constexpr auto CHARACTERISTIC_UUID_TX = "6E400003-B5A3-F393-E0A9-E50E24DCCA9E";
+    constexpr auto SERVICE_UUID = "2333";
+    constexpr auto CHARACTERISTIC_UUID_RX = "6E400002-B5A3-F393-E0A9-114514191981";
+    constexpr auto CHARACTERISTIC_UUID_TX = "6E400003-B5A3-F393-E0A9-114514191981";
 
     /**  None of these are required as they will be handled by the library with defaults. **
      **                       Remove as you see fit for your needs                        */
@@ -77,8 +77,6 @@ namespace blue
         BLEDevice::init(devName.c_str());
 
         static auto pServer = BLEDevice::createServer();
-        ;
-
         // Create the BLE Server
         pServer->setCallbacks(new SvrCallbacks());
 
@@ -107,7 +105,8 @@ namespace blue
         pService->start();
 
         // Start advertising
-        pServer->getAdvertising()->start();
+        pServer->getAdvertising()->addServiceUUID(pService->getUUID());
+        pServer->startAdvertising();
         printf("Waiting a client connection to notify...\n");
     }
 

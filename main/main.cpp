@@ -19,7 +19,7 @@ void collectDataTask(void *shit)
             continue;
 
         anal::start();
-        std::vector<uint8_t> analogValues(24);
+        std::vector<uint8_t> analogValues(12);
 
         while (!anal::read(&analogValues))
             ;
