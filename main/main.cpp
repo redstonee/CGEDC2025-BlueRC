@@ -9,6 +9,15 @@
 #include "blue.h"
 #include "anal.h"
 
+void selectRow(RowPin row_pin)
+{
+    for (auto p : RowPins)
+    {
+        digitalWrite(static_cast<uint8_t>(p), 1);
+    }
+    digitalWrite(static_cast<uint8_t>(row_pin), 0);
+}
+
 void collectDataTask(void *shit)
 {
     while (1)
@@ -17,13 +26,18 @@ void collectDataTask(void *shit)
         if (!blue::isConnected())
             continue;
 
-        analogContinuousStart();
         std::vector<uint8_t> analogValues(12);
 
-        // Wait for ADC to wake this shit up
-        ulTaskNotifyTake(true, portMAX_DELAY);
-        anal::read(&analogValues);
-        analogContinuousStop();
+        for (uint8_t i = 0; i < 3; i++)
+        {
+            selectRow(RowPins[i]);
+            analogContinuousStart();
+            // Wait for ADC to wake this shit up
+            ulTaskNotifyTake(true, portMAX_DELAY);
+            anal::read(&analogValues, i * 4);
+            analogContinuousStop();
+        }
+
         blue::send(analogValues);
     }
 }
@@ -32,9 +46,8 @@ extern "C" void app_main()
 {
     initArduino();
 
-    static auto colPins = {PIN_COL1, PIN_COL2, PIN_COL3, PIN_COL4, PIN_COL5, PIN_COL6};
-    for (auto p : colPins)
-        pinMode(p, OUTPUT);
+    for (auto p : RowPins)
+        pinMode(static_cast<uint8_t>(p), OUTPUT);
 
     // Configure dynamic frequency scaling
     // automatic light sleep is enabled
@@ -48,6 +61,6 @@ extern "C" void app_main()
     blue::init();
 
     TaskHandle_t collectDataTaskHandle;
-    xTaskCreate(collectDataTask, "Collect data", 5000, &colPins, 4, &collectDataTaskHandle);
+    xTaskCreate(collectDataTask, "Collect data", 5000, nullptr, 4, &collectDataTaskHandle);
     anal::init(collectDataTaskHandle);
 }
