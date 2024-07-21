@@ -5,44 +5,22 @@
 
 namespace anal
 {
-    static bool adcStarted = false;
-    static volatile bool adcFinished = false;
+    static TaskHandle_t _taskToNotify;
 
     uint8_t rowPins[] = {PIN_ROW1, PIN_ROW2, PIN_ROW3, PIN_ROW4};
-    void init()
+
+    void init(TaskHandle_t taskToNotify)
     {
+        _taskToNotify = taskToNotify;
         analogContinuousSetAtten(ADC_11db);
-        analogContinuous(rowPins, 4, 5, 10000, []
-                         { adcFinished = true; });
+        analogContinuous(rowPins, 4, 5, 20000, []
+                         { xTaskNotifyGive(_taskToNotify); });
     }
 
-    void start()
+    void read(std::vector<uint8_t> *result)
     {
-        if (!adcStarted)
-        {
-            analogContinuousStart();
-            adcStarted = true;
-        }
-    }
-
-    void stop()
-    {
-        if (adcStarted)
-        {
-    // ESP_ERROR_CHECK(adc_continuous_stop(adc_handle[ADC_UNIT_1].adc_continuous_handle));
-            analogContinuousStop();
-            adcStarted = false;
-        }
-    }
-
-    bool read(std::vector<uint8_t> *result)
-    {
-        if (!adcFinished)
-            return false;
-
         adc_continuous_data_t *anaContinousResults;
         analogContinuousRead(&anaContinousResults, 0);
-        adcFinished = false;
 
         for (uint8_t i = 0; i < 4; i++)
         {
@@ -64,7 +42,6 @@ namespace anal
                 break;
             }
         }
-        return true;
     }
 
 } // namespace anal
