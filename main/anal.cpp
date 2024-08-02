@@ -15,7 +15,7 @@ namespace anal
 
         _taskToNotify = taskToNotify;
         analogContinuousSetAtten(ADC_11db);
-        analogContinuous(colPins.data(), 4, 5, 20000, []
+        analogContinuous(colPins.data(), 4, 5, 30000, []
                          { xTaskNotifyGive(_taskToNotify); });
     }
 

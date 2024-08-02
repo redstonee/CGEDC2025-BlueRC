@@ -31,8 +31,11 @@ void collectDataTask(void *shit)
         for (uint8_t i = 0; i < 3; i++)
         {
             selectRow(RowPins[i]);
+            // vTaskDelay(pdMS_TO_TICKS(1));
             analogContinuousStart();
             // Wait for ADC to wake this shit up
+            ulTaskNotifyTake(true, portMAX_DELAY);
+            anal::read(&analogValues, i * 4);
             ulTaskNotifyTake(true, portMAX_DELAY);
             anal::read(&analogValues, i * 4);
             analogContinuousStop();
