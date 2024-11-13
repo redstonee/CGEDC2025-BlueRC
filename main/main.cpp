@@ -23,9 +23,11 @@ void collectDataTask(void *shit)
     std::vector<uint8_t> analogValues(12);
     while (1)
     {
-        vTaskDelay(pdMS_TO_TICKS(15));
         if (!blue::isConnected())
+        {
+            vTaskDelay(pdMS_TO_TICKS(500));
             continue;
+        }
 
 #if TEST_DATASRC
         for (uint8_t i = 0; i < 8; i++)
@@ -34,8 +36,15 @@ void collectDataTask(void *shit)
         }
 
 #else
-        selectRow(rowPins[0]);
-        anal::read(analogValues, 0);
+
+        for (uint8_t i = 0; i < 2; i++)
+        {
+            selectRow(rowPins[i]);
+            vTaskDelay(pdMS_TO_TICKS(15));
+            anal::read(analogValues, i * 4);
+            anal::read(analogValues, i * 4);
+        }
+
 #endif
 
         blue::send(analogValues);
@@ -57,12 +66,13 @@ extern "C" void app_main()
 
     blue::init();
 
-    TaskHandle_t collectDataTaskHandle;
-    xTaskCreate(collectDataTask, "Collect data", 5000, nullptr, 4, &collectDataTaskHandle);
-
 #if !TEST_DATASRC
     for (auto p : rowPins)
         pinMode(static_cast<uint8_t>(p), OUTPUT);
-    anal::init(collectDataTaskHandle);
+
+    anal::init();
 #endif
+
+    TaskHandle_t collectDataTaskHandle;
+    xTaskCreate(collectDataTask, "Collect data", 5000, nullptr, 4, &collectDataTaskHandle);
 }

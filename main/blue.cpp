@@ -5,7 +5,7 @@
 namespace blue
 {
     static Preferences pref;
-    static BLECharacteristic *pTxCharacteristic;
+    static BLECharacteristic *pDataChar;
     static bool deviceConnected = false;
 
     // See the following for generating UUIDs:
@@ -56,8 +56,8 @@ namespace blue
         if (!isConnected())
             return;
 
-        pTxCharacteristic->setValue((uint8_t *)data.c_str(), data.length());
-        pTxCharacteristic->notify();
+        pDataChar->setValue((uint8_t *)data.c_str(), data.length());
+        pDataChar->notify();
     }
 
     void send(std::vector<uint8_t> data)
@@ -65,8 +65,8 @@ namespace blue
         if (!isConnected())
             return;
 
-        pTxCharacteristic->setValue(data);
-        pTxCharacteristic->notify();
+        pDataChar->setValue(data);
+        pDataChar->notify();
     }
 
     void init()
@@ -76,30 +76,22 @@ namespace blue
         auto devName = pref.getString("name", "Stinky Foot");
         BLEDevice::init(devName.c_str());
 
-        static auto pServer = BLEDevice::createServer();
         // Create the BLE Server
+        static auto pServer = BLEDevice::createServer();
         pServer->setCallbacks(new SvrCallbacks());
 
         // Create the BLE Service
         static auto pService = pServer->createService(SERVICE_UUID);
 
         // Create a BLE Characteristic for sending data
-        pTxCharacteristic = pService->createCharacteristic(
+        pDataChar = pService->createCharacteristic(
             CHARACTERISTIC_UUID_TX, NIMBLE_PROPERTY::NOTIFY);
 
-        /***************************************************
-         NOTE: DO NOT create a 2902 descriptor
-         it will be created automatically if notifications
-         or indications are enabled on a characteristic.
-
-         pCharacteristic->addDescriptor(new BLE2902());
-        ****************************************************/
-
         // Create a BLE Characteristic for setting name
-        BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(
+        BLECharacteristic *pRenameChar = pService->createCharacteristic(
             CHARACTERISTIC_UUID_RX, NIMBLE_PROPERTY::WRITE);
 
-        pRxCharacteristic->setCallbacks(new CharCallbacks());
+        pRenameChar->setCallbacks(new CharCallbacks());
 
         // Start the service
         pService->start();
