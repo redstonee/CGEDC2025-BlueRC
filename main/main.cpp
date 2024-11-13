@@ -5,7 +5,7 @@
 #include "Preferences.h"
 #include "esp_pm.h"
 
-#include "pins.h"
+#include "config.h"
 #include "blue.h"
 #include "anal.h"
 
@@ -30,11 +30,11 @@ void collectDataTask(void *shit)
 #if TEST_DATASRC
         for (uint8_t i = 0; i < 8; i++)
         {
-            analogValues[i] += i*2;
+            analogValues[i] += i * 2;
         }
 
 #else
-          selectRow(rowPins[0]);
+        selectRow(rowPins[0]);
         anal::read(analogValues, 0);
 #endif
 

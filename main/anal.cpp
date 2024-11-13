@@ -2,7 +2,7 @@
 #include "anal.h"
 #include <esp_adc/adc_oneshot.h>
 
-#include "pins.h"
+#include "config.h"
 
 namespace anal
 {
