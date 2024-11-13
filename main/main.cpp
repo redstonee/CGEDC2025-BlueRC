@@ -20,14 +20,21 @@ void selectRow(RowPin row_pin)
 
 void collectDataTask(void *shit)
 {
+    std::vector<uint8_t> analogValues(12);
+
     while (1)
     {
-        vTaskDelay(pdTICKS_TO_MS(20));
+        vTaskDelay(pdMS_TO_TICKS(40));
         if (!blue::isConnected())
             continue;
 
-        std::vector<uint8_t> analogValues(12);
+#if TEST_DATASRC
+        for (uint8_t i = 0; i < 8; i++)
+        {
+            analogValues[i] += i*2;
+        }
 
+#else
         for (uint8_t i = 0; i < 3; i++)
         {
             selectRow(RowPins[i]);
@@ -37,6 +44,7 @@ void collectDataTask(void *shit)
             anal::read(&analogValues, i * 4);
             analogContinuousStop();
         }
+#endif
 
         blue::send(analogValues);
     }
@@ -45,9 +53,6 @@ void collectDataTask(void *shit)
 extern "C" void app_main()
 {
     initArduino();
-
-    for (auto p : RowPins)
-        pinMode(static_cast<uint8_t>(p), OUTPUT);
 
     // Configure dynamic frequency scaling
     // automatic light sleep is enabled
@@ -62,5 +67,10 @@ extern "C" void app_main()
 
     TaskHandle_t collectDataTaskHandle;
     xTaskCreate(collectDataTask, "Collect data", 5000, nullptr, 4, &collectDataTaskHandle);
+
+#if !TEST_DATASRC
+    for (auto p : RowPins)
+        pinMode(static_cast<uint8_t>(p), OUTPUT);
     anal::init(collectDataTaskHandle);
+#endif
 }
