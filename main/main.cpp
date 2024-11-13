@@ -11,7 +11,7 @@
 
 void selectRow(RowPin row_pin)
 {
-    for (auto p : RowPins)
+    for (auto p : rowPins)
     {
         digitalWrite(static_cast<uint8_t>(p), 1);
     }
@@ -20,26 +20,46 @@ void selectRow(RowPin row_pin)
 
 void collectDataTask(void *shit)
 {
+    std::vector<uint8_t> analogValues(12);
     while (1)
     {
-        vTaskDelay(pdTICKS_TO_MS(20));
+        vTaskDelay(pdMS_TO_TICKS(15));
         if (!blue::isConnected())
             continue;
+        // 2 rows
+        // for (uint8_t i = 0; i < 2; i++)
+        // {
+        // vTaskDelay(1);
+        // analogContinuousStart();
+        // Wait for ADC to wake this shit up
+        // ulTaskNotifyTake(true, portMAX_DELAY);
+        selectRow(rowPins[0]);
+        anal::read(analogValues, 0);
+        // ulTaskNotifyTake(true, portMAX_DELAY);
+        // anal::read(analogValues, 0);
+        // analogContinuousStop();
+        // vTaskDelay(pdMS_TO_TICKS(15));
 
-        std::vector<uint8_t> analogValues(12);
+        // selectRow(rowPins[1]);
+        // anal::read(analogValues, 4);
+        // vTaskDelay(1);
+        // analogContinuousStart();
+        // Wait for ADC to wake this shit up
+        // ulTaskNotifyTake(true, portMAX_DELAY);
+        // anal::read(analogValues, 4);
+        // ulTaskNotifyTake(true, portMAX_DELAY);
+        // analogContinuousStop();
+        // }
 
-        for (uint8_t i = 0; i < 3; i++)
-        {
-            selectRow(RowPins[i]);
-            // vTaskDelay(pdMS_TO_TICKS(1));
-            analogContinuousStart();
-            // Wait for ADC to wake this shit up
-            ulTaskNotifyTake(true, portMAX_DELAY);
-            anal::read(&analogValues, i * 4);
-            ulTaskNotifyTake(true, portMAX_DELAY);
-            anal::read(&analogValues, i * 4);
-            analogContinuousStop();
-        }
+        // New sensors: 4 dots
+        // selectRow(rowPins[0]);
+        // analogContinuousStart();
+        // // Wait for ADC to wake this shit up
+        // ulTaskNotifyTake(true, portMAX_DELAY);
+        // anal::read(&analogValues, 0);
+        // ulTaskNotifyTake(true, portMAX_DELAY);
+        // anal::read(&analogValues, 0);
+        // analogContinuousStop();
 
         blue::send(analogValues);
     }
@@ -49,7 +69,7 @@ extern "C" void app_main()
 {
     initArduino();
 
-    for (auto p : RowPins)
+    for (auto p : rowPins)
         pinMode(static_cast<uint8_t>(p), OUTPUT);
 
     // Configure dynamic frequency scaling

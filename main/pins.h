@@ -13,13 +13,13 @@ enum class ColPin
 
 enum class RowPin
 {
-    ROW1 = 27,
-    ROW2 = 26,
+    ROW1 = 10,
+    ROW2 = 11,
     ROW3 = 25,
-    ROW4 = 10,
-    ROW5 = 11,
+    ROW4 = 26,
+    ROW5 = 27,
     ROW6 = 12,
 };
 
-static const ColPin ColPins[] = {ColPin::COL1, ColPin::COL2, ColPin::COL3, ColPin::COL4};
-static const RowPin RowPins[] = {RowPin::ROW1, RowPin::ROW2, RowPin::ROW3, RowPin::ROW4, RowPin::ROW5, RowPin::ROW6};
+static const ColPin colPins[] = {ColPin::COL1, ColPin::COL2, ColPin::COL3, ColPin::COL4};
+static const RowPin rowPins[] = {RowPin::ROW1, RowPin::ROW2, RowPin::ROW3, RowPin::ROW4, RowPin::ROW5, RowPin::ROW6};
