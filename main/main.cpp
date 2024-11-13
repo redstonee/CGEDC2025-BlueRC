@@ -26,40 +26,17 @@ void collectDataTask(void *shit)
         vTaskDelay(pdMS_TO_TICKS(15));
         if (!blue::isConnected())
             continue;
-        // 2 rows
-        // for (uint8_t i = 0; i < 2; i++)
-        // {
-        // vTaskDelay(1);
-        // analogContinuousStart();
-        // Wait for ADC to wake this shit up
-        // ulTaskNotifyTake(true, portMAX_DELAY);
-        selectRow(rowPins[0]);
+
+#if TEST_DATASRC
+        for (uint8_t i = 0; i < 8; i++)
+        {
+            analogValues[i] += i*2;
+        }
+
+#else
+          selectRow(rowPins[0]);
         anal::read(analogValues, 0);
-        // ulTaskNotifyTake(true, portMAX_DELAY);
-        // anal::read(analogValues, 0);
-        // analogContinuousStop();
-        // vTaskDelay(pdMS_TO_TICKS(15));
-
-        // selectRow(rowPins[1]);
-        // anal::read(analogValues, 4);
-        // vTaskDelay(1);
-        // analogContinuousStart();
-        // Wait for ADC to wake this shit up
-        // ulTaskNotifyTake(true, portMAX_DELAY);
-        // anal::read(analogValues, 4);
-        // ulTaskNotifyTake(true, portMAX_DELAY);
-        // analogContinuousStop();
-        // }
-
-        // New sensors: 4 dots
-        // selectRow(rowPins[0]);
-        // analogContinuousStart();
-        // // Wait for ADC to wake this shit up
-        // ulTaskNotifyTake(true, portMAX_DELAY);
-        // anal::read(&analogValues, 0);
-        // ulTaskNotifyTake(true, portMAX_DELAY);
-        // anal::read(&analogValues, 0);
-        // analogContinuousStop();
+#endif
 
         blue::send(analogValues);
     }
@@ -68,9 +45,6 @@ void collectDataTask(void *shit)
 extern "C" void app_main()
 {
     initArduino();
-
-    for (auto p : rowPins)
-        pinMode(static_cast<uint8_t>(p), OUTPUT);
 
     // Configure dynamic frequency scaling
     // automatic light sleep is enabled
@@ -85,5 +59,10 @@ extern "C" void app_main()
 
     TaskHandle_t collectDataTaskHandle;
     xTaskCreate(collectDataTask, "Collect data", 5000, nullptr, 4, &collectDataTaskHandle);
+
+#if !TEST_DATASRC
+    for (auto p : rowPins)
+        pinMode(static_cast<uint8_t>(p), OUTPUT);
     anal::init(collectDataTaskHandle);
+#endif
 }
