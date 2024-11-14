@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
-namespace blue{
+namespace blue
+{
     void init();
     void send(String data);
     void send(std::vector<uint8_t> data);
