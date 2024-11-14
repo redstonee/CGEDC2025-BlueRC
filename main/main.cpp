@@ -41,8 +41,8 @@ void collectDataTask(void *shit)
         {
             selectRow(rowPins[i]);
             vTaskDelay(pdMS_TO_TICKS(15));
-            anal::read(analogValues, i * 4);
-            anal::read(analogValues, i * 4);
+            anal::read(analogValues, i << 2);
+            anal::read(analogValues, i << 2);
         }
 
 #endif

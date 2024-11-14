@@ -16,23 +16,21 @@ namespace anal
             tmp.push_back(static_cast<uint8_t>(p));
 
         analogContinuousSetAtten(ADC_6db);
-        analogContinuous(tmp.data(), 4, 3, 30000, []
+        analogContinuous(tmp.data(), 4, 8, 60000, []
                          { adcFinished = true; });
     }
 
     void read(std::vector<uint8_t> &result, uint8_t offset)
     {
         analogContinuousStart();
+        adc_continuous_data_t *anaContinousResults;
         while (!adcFinished)
         {
             vTaskDelay(1);
         }
-
-        adc_continuous_data_t *anaContinousResults;
         analogContinuousRead(&anaContinousResults, 0);
         analogContinuousStop();
         adcFinished = false;
-        
 
         for (uint8_t i = 0; i < 4; i++)
         {
