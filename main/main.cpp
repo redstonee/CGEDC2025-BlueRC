@@ -9,6 +9,11 @@
 #include "blue.h"
 #include "anal.h"
 
+/**
+ * @brief Selects a row to read from.
+ * 
+ * @param row_pin The pin of the row to select.
+ */
 void selectRow(RowPin row_pin)
 {
     for (auto p : rowPins)
@@ -18,6 +23,10 @@ void selectRow(RowPin row_pin)
     digitalWrite(static_cast<uint8_t>(row_pin), 0);
 }
 
+/**
+ * @brief A task that collects data from ADC and sends it over BLE.
+ *
+ */
 void collectDataTask(void *shit)
 {
     std::vector<uint8_t> analogValues(12);
@@ -34,9 +43,7 @@ void collectDataTask(void *shit)
         {
             analogValues[i] += i * 2;
         }
-
 #else
-
         for (uint8_t i = 0; i < 2; i++)
         {
             selectRow(rowPins[i]);
@@ -44,7 +51,6 @@ void collectDataTask(void *shit)
             anal::read(analogValues, i << 2);
             anal::read(analogValues, i << 2);
         }
-
 #endif
 
         blue::send(analogValues);
