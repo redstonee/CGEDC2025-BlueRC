@@ -73,7 +73,8 @@ namespace blue
     {
         pref.begin("blue", false);
 
-        auto devName = pref.getString("name", "Stinky Foot");
+        auto addr = NimBLEDevice::getAddress().getNative();
+        auto devName = pref.getString("name", "Stinky Foot" + String(addr[4], 16) + String(addr[5], 16));
         BLEDevice::init(devName.c_str());
 
         // Create the BLE Server
