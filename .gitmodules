@@ -1,6 +1,9 @@
-[submodule "components/arduino"]
-	path = components/arduino
-	url = https://github.com/espressif/arduino-esp32.git
 [submodule "components/nimble"]
 	path = components/nimble
 	url = https://github.com/h2zero/esp-nimble-cpp
+[submodule "components/lvgl"]
+	path = components/lvgl
+	url = https://github.com/lvgl/lvgl.git
+[submodule "components/TFT_eSPI"]
+	path = components/TFT_eSPI
+	url = https://github.com/redstonee/TFT_eSPI
