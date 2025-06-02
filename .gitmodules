@@ -7,3 +7,6 @@
 [submodule "components/TFT_eSPI"]
 	path = components/TFT_eSPI
 	url = https://github.com/redstonee/TFT_eSPI
+[submodule "components/arduino"]
+	path = components/arduino
+	url = https://github.com/espressif/arduino-esp32
