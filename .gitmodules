@@ -10,6 +10,6 @@
 [submodule "components/arduino"]
 	path = components/arduino
 	url = https://github.com/espressif/arduino-esp32
-[submodule "components/axp173/AXP173-Arduino"]
-	path = components/axp173/AXP173-Arduino
+[submodule "components/AXP173"]
+	path = components/AXP173
 	url = https://github.com/redstonee/AXP173-Arduino

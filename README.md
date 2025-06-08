@@ -1,39 +1,23 @@
-# Foot Sensor
-This is a foot sensor project that uses a force sensitive resistor to detect the pressure of the foot.  
-The whole circuit is integrated in a shoe sole. The data is sent to a phone via Bluetooth.  
-The data is then processed and displayed on the phone. The data is also sent to a server for further analysis.
+# CGEDC2025-BlueRC
+The remote controller source tree of our
+CGEDC2025 `BLE Air-Conditioner Remote Controller` project.
 
-## Hardware
-- Force Sensitive Resistor
-- MCU and Bluetooth module(ESP32H2)
-- Battery
-- Battery charger(TP4054)
+# Project Structure
+The project is developed using the ESP-IDF framework and follows a standard structure.
+Below is an overview of the directory layout:
 
-## Software
-This project uses the ESP-IDF and Arduino framework.  
-
-### Build
-0. Install the ESP-IDF environment.
-
-1. Clone the repository:
-```bash
-git clone https://github.com/HQU-gxy/footSensor.git
 ```
-
-2. Change the directory to the project and export ESP-IDF path:
-```bash
-cd footSensor
-. path/to/idf/export.sh 
+.
+├── .vscode/                # VSCode settings
+├── components/             # IDF Components used in the project
+│   ├── arduino             # Arduino component for ESP-IDF
+│   ├── AXP173              # AXP173 PMIC driver
+│   ├── lvgl                # LVGL graphics library
+│   ├── nimble              # NimBLE C++ driver
+│   └── TFT_eSPI            # TFT_eSPI driver for Arduino
+├── main/                   # Main application code
+├── CMakeLists.txt          # CMake build configuration
+├── sdkconfig.defaults      # Default configuration for the project
+├── README.md               # Project brief documentation
+└── LICENSE                 # Project license
 ```
-
-3. Build the project:
-```bash
-idf.py build
-```
-
-4. Flash the executable to the chip:
-```bash
-idf.py -p /dev/ttyUSB0 flash # Change the port to the one you are using
-```
-
-
