@@ -4,7 +4,6 @@
 
 namespace blue
 {
-    static Preferences pref;
     static BLECharacteristic *pDataChar;
     static bool deviceConnected = false;
 
@@ -41,7 +40,6 @@ namespace blue
             if (rxValue.length() > 0)
             {
                 printf("Received: %s\n", rxValue.c_str());
-                pref.putString("name", rxValue.c_str());
             }
         }
     };
@@ -71,11 +69,7 @@ namespace blue
 
     void init()
     {
-        pref.begin("blue", false);
-
-        auto addr = NimBLEDevice::getAddress().getNative();
-        auto devName = pref.getString("name", "Stinky Foot" + String(addr[4], 16) + String(addr[5], 16));
-        BLEDevice::init(devName.c_str());
+        BLEDevice::init("Blue RC");
 
         // Create the BLE Server
         static auto pServer = BLEDevice::createServer();
