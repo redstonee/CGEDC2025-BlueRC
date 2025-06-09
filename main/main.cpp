@@ -54,7 +54,8 @@ extern "C" void app_main()
     axp.setOutputEnable(axp.LDO2, false);
     axp.setOutputEnable(axp.LDO3, false);
     axp.setOutputEnable(axp.LDO4, false);
-
+    // Set the charge current
+    axp.setChargeCurrent(axp.CHG_450mA);
     // Enable Battery ADC channels
     axp.setADCEnable(axp.ADC_BAT_V, true);
     axp.setADCEnable(axp.ADC_BAT_C, true);
@@ -76,7 +77,7 @@ extern "C" void app_main()
     //                 { lastTouchTime = millis(); }, FALLING); // Attach touch interrupt
 
     // Create a queue for battery info
-    batteryInfoQueue = xQueueCreate(10, sizeof(std::tuple<int, int, uint8_t>));
+    batteryInfoQueue = xQueueCreate(3, sizeof(std::tuple<int, int, uint8_t>));
 
     GFX::init();
     blue::init();

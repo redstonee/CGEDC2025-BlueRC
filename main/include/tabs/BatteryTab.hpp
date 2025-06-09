@@ -1,8 +1,7 @@
 #pragma once
 
+#include <tuple>
 #include "Tab.hpp"
-#include "Arduino.h"
-#include "AXP173.h"
 
 // WARNING: This is a global variable, use with CAUTION!
 extern QueueHandle_t batteryInfoQueue;
@@ -14,7 +13,6 @@ private:
 
     lv_obj_t *batteryLevelBar;
     lv_obj_t *batteryLevelLabel;
-
     lv_obj_t *voltageLabel;
     lv_obj_t *currentLabel;
 
@@ -48,7 +46,7 @@ public:
         lv_obj_add_style(battLevelLayout, &smallLayoutStyle, 0);
         batteryLevelBar = lv_bar_create(battLevelLayout);
         lv_obj_set_width(batteryLevelBar, lv_pct(60));
-        lv_bar_set_range(batteryLevelBar, 3000, 4200);
+        lv_bar_set_range(batteryLevelBar, 0, 100);
         batteryLevelLabel = lv_label_create(battLevelLayout);
         lv_label_set_text(batteryLevelLabel, "0 %%");
 
@@ -83,7 +81,7 @@ public:
 
             lv_label_set_text_fmt(currentLabel, "%d mA", current);
 
-            lv_bar_set_value(batteryLevelBar, current, LV_ANIM_ON);
+            lv_bar_set_value(batteryLevelBar, level, LV_ANIM_ON);
             lv_label_set_text_fmt(batteryLevelLabel, "%d %%", level);
         }
     }
