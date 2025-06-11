@@ -5,7 +5,8 @@
 
 #include "GFX.h"
 #include "tabs/BatteryTab.hpp"
-#include "tabs/DevicesTab.hpp"
+#include "tabs/ControlTab.h"
+#include "tabs/ParingTab.hpp"
 #include "config.h"
 
 namespace GFX
@@ -13,6 +14,15 @@ namespace GFX
     static TFT_eSPI screen;
     constexpr auto DRAW_BUF_SIZE = TFT_WIDTH * TFT_HEIGHT / 10 * (LV_COLOR_DEPTH / 8);
 
+    /**
+     * @brief Send the pixel map to the display.
+     *
+     * @param disp LVGL display object
+     * @param area Display area to flush
+     * @param px_map Pointer to the pixel map to be displayed
+     *
+     * @note This function is called by LVGL to flush the pixel map to the display.
+     */
     static void flushScreen(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map)
     {
         uint32_t w = lv_area_get_width(area);
@@ -26,6 +36,14 @@ namespace GFX
         lv_disp_flush_ready(disp);
     }
 
+    /**
+     * @brief Read touch input from the display.
+     *
+     * @param indev Pointer to the input device
+     * @param data Pointer to the input data structure to fill
+     *
+     * @note This function is called by LVGL to read touch input.
+     */
     static void readTouch(lv_indev_t *indev, lv_indev_data_t *data)
     {
         uint16_t touchX, touchY;
@@ -41,6 +59,14 @@ namespace GFX
         }
     }
 
+    /**
+     * @brief Print log messages from LVGL to the ESP-IDF log system.
+     *
+     * @param level The log level of the message
+     * @param buf The message buffer containing the log message
+     *
+     * @note This function is called by LVGL to print log messages.
+     */
     static void printLog(lv_log_level_t level, const char *buf)
     {
         constexpr auto TAG = "LVGL";
@@ -64,12 +90,18 @@ namespace GFX
         }
     }
 
+    /**
+     * @brief Task to handle LVGL events and update the display.
+     *
+     * @param arg Pointer to the array of Tab pointers
+     */
     void lvglTask(void *arg)
     {
         auto tabs = static_cast<Tab **>(arg);
         uint8_t nTabs = 0;
         while (tabs[nTabs]) // Initialize all tabs before starting the loop
         {
+            ESP_LOGI("GFX", "Initializing tab %d", nTabs);
             tabs[nTabs++]->initTab();
         }
 
@@ -83,6 +115,17 @@ namespace GFX
         }
     }
 
+    void onTabChanged(lv_event_t *e)
+    {
+        auto tabview = lv_event_get_target_obj(e);
+        auto tabIndex = lv_tabview_get_tab_active(tabview);
+        ESP_LOGI("GFX", "Tab changed to: %lu", tabIndex);
+    }
+
+    /**
+     * @brief Initialize the TFT display and LVGL.
+     * This function sets up the display, initializes LVGL, and creates the tab view.
+     */
     void init()
     {
         // Initialize the TFT display and LVGL
@@ -117,12 +160,15 @@ namespace GFX
         auto tabview = lv_tabview_create(lv_screen_active());
         lv_tabview_set_tab_bar_position(tabview, LV_DIR_LEFT);
         lv_tabview_set_tab_bar_size(tabview, 80);
+        lv_obj_add_event_cb(tabview, onTabChanged, LV_EVENT_VALUE_CHANGED, nullptr);
+        lv_obj_remove_flag(lv_tabview_get_content(tabview), LV_OBJ_FLAG_SCROLLABLE);
 
         // Create the battery tab
+        auto controlTab = new ControlTab(tabview);
+        auto pairingTab = new Pairing(tabview);
         auto batteryTab = new BatteryTab(tabview);
-        auto devicesTab = new DevicesTab(tabview);
 
-        static Tab *tabs[]{batteryTab, devicesTab, nullptr};
+        static Tab *tabs[]{controlTab, pairingTab, batteryTab, nullptr};
 
         xTaskCreate(lvglTask, "lvglTask", 8192, tabs, 5, NULL); /*Create a task to handle LVGL events*/
     }

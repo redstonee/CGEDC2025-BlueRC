@@ -90,7 +90,9 @@ extern "C" void app_main()
             if (irqs[axp.PEK_SHORT_PRESS_IRQn])
             {
                 ESP_LOGI(TAG, "PEK short press detected");
+                axp.clearIRQFlags(irqs); // Clear the IRQ flags before sleeping
                 sleeeeeep();
+                // Unreachable, as sleeeeeep() will terminate the program
             }
             if (irqs[axp.BAT_CHG_FIN_IRQn])
             {

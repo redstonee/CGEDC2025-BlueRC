@@ -2,14 +2,14 @@
 
 #include "Tab.hpp"
 
-class DevicesTab : public Tab
+class Pairing : public Tab
 {
 private:
     uint32_t lastUpdateTime = 0;
 
 public:
-    DevicesTab(lv_obj_t *parent)
-        : Tab(parent, "Devices") {};
+    Pairing(lv_obj_t *parent)
+        : Tab(parent, "Paring") {};
 
     void initTab() override
     {
@@ -21,9 +21,12 @@ public:
         lv_style_set_layout(&tabStyle, LV_LAYOUT_FLEX);
         lv_obj_add_style(root, &tabStyle, 0);
 
-        auto *label = lv_label_create(root);
-        lv_label_set_text(label, "Manage Devices");
-        lv_obj_set_style_text_font(label, &lv_font_montserrat_24, 0);
+        auto *titleLabel = lv_label_create(root);
+        lv_label_set_text(titleLabel, "Paring");
+        lv_obj_set_style_text_font(titleLabel, &lv_font_montserrat_24, 0);
+
+        auto listLayout = lv_obj_create(root);
+        lv_obj_remove_style_all(listLayout);
 
         static lv_style_t layoutStyle;
         lv_style_init(&layoutStyle);

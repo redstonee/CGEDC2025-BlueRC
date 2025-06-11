@@ -18,8 +18,11 @@ private:
 
 public:
     BatteryTab(lv_obj_t *parent)
-        : Tab(parent, "Battery") {};
+        : Tab(parent, "Battery") {}
 
+    /**
+     * @brief Initialize the Battery tab.
+     */
     void initTab() override
     {
         lv_obj_set_size(root, lv_pct(100), lv_pct(100));
@@ -30,9 +33,9 @@ public:
         lv_style_set_layout(&tabStyle, LV_LAYOUT_FLEX);
         lv_obj_add_style(root, &tabStyle, 0);
 
-        auto *label = lv_label_create(root);
-        lv_label_set_text(label, "Battery Status");
-        lv_obj_set_style_text_font(label, &lv_font_montserrat_24, 0);
+        auto *titleLabel = lv_label_create(root);
+        lv_label_set_text(titleLabel, "Battery Status");
+        lv_obj_set_style_text_font(titleLabel, &lv_font_montserrat_24, 0);
 
         static lv_style_t smallLayoutStyle;
         lv_style_init(&smallLayoutStyle);
@@ -45,7 +48,7 @@ public:
         lv_obj_set_size(battLevelLayout, lv_pct(100), 30);
         lv_obj_add_style(battLevelLayout, &smallLayoutStyle, 0);
         batteryLevelBar = lv_bar_create(battLevelLayout);
-        lv_obj_set_width(batteryLevelBar, lv_pct(60));
+        lv_obj_set_width(batteryLevelBar, lv_pct(70));
         lv_bar_set_range(batteryLevelBar, 0, 100);
         batteryLevelLabel = lv_label_create(battLevelLayout);
         lv_label_set_text(batteryLevelLabel, "0 %%");
@@ -66,7 +69,6 @@ public:
         auto currHint = lv_label_create(currentLayout);
         lv_label_set_text(currHint, "Current:");
         currentLabel = lv_label_create(currentLayout);
-        lv_obj_set_width(currentLabel, lv_pct(35));
         lv_label_set_text(currentLabel, "0 mA");
     }
 
@@ -76,11 +78,8 @@ public:
         if (xQueueReceive(batteryInfoQueue, &batteryInfo, 0))
         {
             auto [voltage, current, level] = batteryInfo;
-
             lv_label_set_text_fmt(voltageLabel, "%d mV", voltage);
-
             lv_label_set_text_fmt(currentLabel, "%d mA", current);
-
             lv_bar_set_value(batteryLevelBar, level, LV_ANIM_ON);
             lv_label_set_text_fmt(batteryLevelLabel, "%d %%", level);
         }

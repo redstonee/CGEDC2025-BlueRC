@@ -16,31 +16,36 @@ namespace blue
 
     /**  None of these are required as they will be handled by the library with defaults. **
      **                       Remove as you see fit for your needs                        */
-    class SvrCallbacks : public BLEServerCallbacks
+    class SvrCallbacks : public NimBLEServerCallbacks
     {
-        void onConnect(BLEServer *pServer, BLEConnInfo &connInfo)
+        void onConnect(BLEServer *pServer, BLEConnInfo &connInfo) override
         {
-            pServer->stopAdvertising();
             deviceConnected = true;
         };
 
-        void onDisconnect(BLEServer *pServer, BLEConnInfo &connInfo, int reason)
+        void onDisconnect(BLEServer *pServer, BLEConnInfo &connInfo, int reason) override
         {
-            pServer->startAdvertising();
             deviceConnected = false;
         }
-    };
 
-    class CharCallbacks : public BLECharacteristicCallbacks
-    {
-        void onWrite(BLECharacteristic *pCharacteristic, BLEConnInfo &connInfo)
+        uint32_t onPassKeyDisplay() override
         {
-            std::string rxValue = pCharacteristic->getValue();
+            // Return a passkey for display, this is just an example
+            // You can implement your own logic to generate a passkey
+            return 123456; // Example passkey
+        }
 
-            if (rxValue.length() > 0)
-            {
-                printf("Received: %s\n", rxValue.c_str());
-            }
+        void onConfirmPIN(const NimBLEConnInfo &connInfo, uint32_t pin) override
+        {
+            /** Return false if passkeys don't match. */
+            bool matched = (pin == 123456); // Example passkey check
+            ESP_LOGI("Blue", "Confirm PIN: %s", matched ? "Matched" : "Not Matched");
+            NimBLEDevice::injectConfirmPIN(connInfo, matched);
+        };
+
+        void onAuthenticationComplete(const NimBLEConnInfo &connInfo, const std::string &name) override
+        {
+            ESP_LOGI("Blue", "Authentication complete for %s", name.c_str());
         }
     };
 
@@ -71,6 +76,8 @@ namespace blue
     {
         BLEDevice::init("Blue RC");
 
+        BLEDevice::setSecurityAuth(true, true, true);
+        BLEDevice::setSecurityIOCap(BLE_HS_IO_DISPLAY_ONLY);
         // Create the BLE Server
         static auto pServer = BLEDevice::createServer();
         pServer->setCallbacks(new SvrCallbacks());
@@ -82,19 +89,11 @@ namespace blue
         pDataChar = pService->createCharacteristic(
             CHARACTERISTIC_UUID_TX, NIMBLE_PROPERTY::NOTIFY);
 
-        // Create a BLE Characteristic for setting name
-        BLECharacteristic *pRenameChar = pService->createCharacteristic(
-            CHARACTERISTIC_UUID_RX, NIMBLE_PROPERTY::WRITE);
-
-        pRenameChar->setCallbacks(new CharCallbacks());
-
         // Start the service
-        pService->start();
-
-        // Start advertising
-        pServer->getAdvertising()->addServiceUUID(pService->getUUID());
-        pServer->startAdvertising();
-        printf("Waiting a client connection to notify...\n");
+        // pService->start();
+        // // Start advertising
+        // pServer->getAdvertising()->addServiceUUID(pService->getUUID());
+        // pServer->startAdvertising();
     }
 
 } // namespace blue
