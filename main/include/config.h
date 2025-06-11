@@ -12,7 +12,7 @@ constexpr auto AXP_SDA_PIN = 22;
 constexpr auto AXP_INT_PIN = 8;
 
 // Sleep timeout in milliseconds
-constexpr auto SLEEP_TIMEOUT = 60 * 1000;
+constexpr auto SLEEP_TIMEOUT = 30 * 1000;
 
 // Battery capacity in mAh
 constexpr auto BATT_CAP = 500;

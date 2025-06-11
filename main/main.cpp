@@ -70,12 +70,6 @@ extern "C" void app_main()
         .set(axp.BAT_CHG_FIN_IRQn);
     axp.enableIRQs(irqs); // Enable VBUS insert and remove interrupts
 
-    // TODO: Interrupt always triggered, need to debug
-    // Set up touch interrupt for sleep management
-    // static uint32_t lastTouchTime = millis();
-    // attachInterrupt(TCH_INT_PIN, []
-    //                 { lastTouchTime = millis(); }, FALLING); // Attach touch interrupt
-
     // Create a queue for battery info
     batteryInfoQueue = xQueueCreate(3, sizeof(std::tuple<int, int, uint8_t>));
 
@@ -102,13 +96,14 @@ extern "C" void app_main()
             axp.clearIRQFlags(irqs); // Clear the IRQ flags after processing
         }
 
-        // TODO: Interrupt always triggered, need to debug
-        // if (millis() - lastTouchTime > SLEEP_TIMEOUT)
-        // {
-        //     ESP_LOGI(TAG, "No touch detected for %d s, going to sleep", SLEEP_TIMEOUT / 1000);
-        //     sleeeeeep();
-        // }
+        // Check inactivity
+        if (millis() - GFX::getLastTouchTime() > SLEEP_TIMEOUT)
+        {
+            ESP_LOGI(TAG, "No touch detected for %d s, going to sleep", SLEEP_TIMEOUT / 1000);
+            sleeeeeep();
+        }
 
+        // Gather battery information and send it to the queue
         auto battLevel = 1 + axp.getCoulometerData() / BATT_CAP;
         if (battLevel > 1)
             battLevel = 1; // Cap battery level to 100%

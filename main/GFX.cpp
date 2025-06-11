@@ -14,6 +14,13 @@ namespace GFX
     static TFT_eSPI screen;
     constexpr auto DRAW_BUF_SIZE = TFT_WIDTH * TFT_HEIGHT / 10 * (LV_COLOR_DEPTH / 8);
 
+    static uint32_t lastTouchTime;
+
+    uint32_t getLastTouchTime()
+    {
+        return lastTouchTime;
+    }
+
     /**
      * @brief Send the pixel map to the display.
      *
@@ -53,6 +60,7 @@ namespace GFX
         }
         else
         {
+            lastTouchTime = millis();
             data->state = LV_INDEV_STATE_PR;
             data->point.x = touchX;
             data->point.y = touchY;
@@ -101,7 +109,6 @@ namespace GFX
         uint8_t nTabs = 0;
         while (tabs[nTabs]) // Initialize all tabs before starting the loop
         {
-            ESP_LOGI("GFX", "Initializing tab %d", nTabs);
             tabs[nTabs++]->initTab();
         }
 
