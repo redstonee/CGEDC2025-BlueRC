@@ -9,6 +9,8 @@
 #include "tabs/ParingTab.hpp"
 #include "config.h"
 
+//TODO: Use ESP_LCD components which supports DMA
+
 namespace GFX
 {
     static TFT_eSPI screen;

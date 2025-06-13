@@ -1,31 +1,17 @@
 #pragma once
 
 #include "Tab.hpp"
-#include "WString.h"
+#include "Device.hpp"
 #include <vector>
 
 class ControlTab : public Tab
 {
 public:
-    enum class DeviceMode
-    {
-        OFF = 0,
-        HEAT,
-        COOL,
-        DRY,
-        FAN,
-    };
-    struct Device
-    {
-        String name;
-        uint8_t temperature;
-        DeviceMode mode;
-
-        bool selected = false; // Indicates if the device is selected in the UI
-    };
-
 private:
     std::vector<Device> _deviceList; // List of saved devices
+
+    static void configButtonHandler(lv_event_t *e);
+    static void checkboxEventHandler(lv_event_t *e);
 
 public:
     ControlTab(lv_obj_t *parent);
