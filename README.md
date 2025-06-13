@@ -19,5 +19,5 @@ Below is an overview of the directory layout:
 ├── CMakeLists.txt          # CMake build configuration
 ├── sdkconfig.defaults      # Default configuration for the project
 ├── README.md               # Project brief documentation
-└── LICENSE                 # Project license
+└── protocol.md             # Protocol documentation
 ```
