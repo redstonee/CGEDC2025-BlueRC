@@ -5,16 +5,16 @@
 #include "Preferences.h"
 #include "esp_pm.h"
 
-#include "TFT_eSPI.h"
-
 #include "config.h"
 #include "blue.h"
 #include "GFX.h"
+#include "Device.hpp"
 
 #include "AXP173.h"
 
-// WARNING: This is a global variable, use with CAUTION!
+// WARNING: Global variables, use with CAUTION!
 QueueHandle_t batteryInfoQueue;
+QueueHandle_t deviceControlQueue;
 
 constexpr auto TAG = "Main";
 
@@ -72,6 +72,7 @@ extern "C" void app_main()
 
     // Create a queue for battery info
     batteryInfoQueue = xQueueCreate(3, sizeof(std::tuple<int, int, uint8_t>));
+    deviceControlQueue = xQueueCreate(8, sizeof(Device));
 
     GFX::init();
     blue::init();
@@ -118,6 +119,17 @@ extern "C" void app_main()
         if (xQueueSend(batteryInfoQueue, &batteryInfo, 0) != pdTRUE)
         {
             ESP_LOGW(TAG, "Battery info queue is full, dropping data");
+        }
+
+        Device deviceToControl;
+        while (xQueueReceive(deviceControlQueue, &deviceToControl, 0))
+        {
+            ESP_LOGI(TAG, "%s: mode: %d, temperature: %d, speed : %d, direction: %d",
+                     deviceToControl.name,
+                     static_cast<int>(deviceToControl.mode),
+                     deviceToControl.temperature,
+                     static_cast<int>(deviceToControl.speed),
+                     static_cast<int>(deviceToControl.direction));
         }
 
         delay(1000);

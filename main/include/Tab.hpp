@@ -3,6 +3,9 @@
 
 #pragma once
 
+/**
+ * @brief Base class for a tab for the Tabview.
+ */
 class Tab
 {
 protected:

@@ -9,15 +9,20 @@
 #include "tabs/ParingTab.hpp"
 #include "config.h"
 
-//TODO: Use ESP_LCD components which supports DMA
+// TODO: Use ESP_LCD components which supports DMA
 
 namespace GFX
 {
     static TFT_eSPI screen;
-    constexpr auto DRAW_BUF_SIZE = TFT_WIDTH * TFT_HEIGHT / 10 * (LV_COLOR_DEPTH / 8);
+    constexpr auto DRAW_BUF_SIZE = TFT_WIDTH * TFT_HEIGHT / 5 * (LV_COLOR_DEPTH / 8);
 
     static uint32_t lastTouchTime;
 
+    /**
+     * @brief Get the last touch time.
+     *
+     * @return The last touch time (OS tick) in milliseconds.
+     */
     uint32_t getLastTouchTime()
     {
         return lastTouchTime;
@@ -124,6 +129,11 @@ namespace GFX
         }
     }
 
+    /**
+     * @brief Event handler for tab change events.
+     *
+     * @param e The LVGL event data
+     */
     void onTabChanged(lv_event_t *e)
     {
         auto tabview = lv_event_get_target_obj(e);
@@ -133,6 +143,7 @@ namespace GFX
 
     /**
      * @brief Initialize the TFT display and LVGL.
+     *
      * This function sets up the display, initializes LVGL, and creates the tab view.
      */
     void init()
@@ -173,11 +184,10 @@ namespace GFX
         lv_obj_remove_flag(lv_tabview_get_content(tabview), LV_OBJ_FLAG_SCROLLABLE);
 
         // Create the battery tab
-        auto controlTab = new ControlTab(tabview);
-        auto pairingTab = new Pairing(tabview);
-        auto batteryTab = new BatteryTab(tabview);
-
-        static Tab *tabs[]{controlTab, pairingTab, batteryTab, nullptr};
+        static ControlTab controlTab(tabview);
+        static Pairing pairingTab(tabview);
+        static BatteryTab batteryTab(tabview);
+        static Tab *tabs[]{&controlTab, &pairingTab, &batteryTab, nullptr};
 
         xTaskCreate(lvglTask, "lvglTask", 8192, tabs, 5, NULL); /*Create a task to handle LVGL events*/
     }

@@ -2,6 +2,7 @@
 
 #include <tuple>
 #include "Tab.hpp"
+#include "config.h"
 
 // WARNING: This is a global variable, use with CAUTION!
 extern QueueHandle_t batteryInfoQueue;
@@ -48,7 +49,7 @@ public:
         // Battery level information layout
         auto battLevelLayout = lv_obj_create(root);
         lv_obj_remove_style_all(battLevelLayout);
-        lv_obj_set_size(battLevelLayout, lv_pct(100), 30);
+        lv_obj_set_size(battLevelLayout, lv_pct(100), LV_SIZE_CONTENT);
         lv_obj_add_style(battLevelLayout, &smallLayoutStyle, 0);
         batteryLevelBar = lv_bar_create(battLevelLayout);
         lv_obj_set_width(batteryLevelBar, lv_pct(70));
@@ -58,17 +59,22 @@ public:
 
         auto remainTimeLayout = lv_obj_create(root);
         lv_obj_remove_style_all(remainTimeLayout);
-        lv_obj_set_size(remainTimeLayout, lv_pct(100), 30);
+        lv_obj_set_size(remainTimeLayout, lv_pct(100), LV_SIZE_CONTENT);
         lv_obj_add_style(remainTimeLayout, &smallLayoutStyle, 0);
         auto remainTimeHint = lv_label_create(remainTimeLayout);
         lv_label_set_text(remainTimeHint, "Remain Time:");
         remainTimeLabel = lv_label_create(remainTimeLayout);
         lv_label_set_text(remainTimeLabel, "114 d 514 h");
 
+        // Add a padding to separate the battery level from the voltage and current information
+        auto padding = lv_obj_create(root);
+        lv_obj_remove_style_all(padding);
+        lv_obj_set_height(padding, 10); // In fact there will be more padding because of the flex layout
+
         // Voltage information layout
         auto voltageLayout = lv_obj_create(root);
         lv_obj_remove_style_all(voltageLayout);
-        lv_obj_set_size(voltageLayout, lv_pct(100), 30);
+        lv_obj_set_size(voltageLayout, lv_pct(100), LV_SIZE_CONTENT);
         lv_obj_add_style(voltageLayout, &smallLayoutStyle, 0);
         auto voltHint = lv_label_create(voltageLayout);
         lv_label_set_text(voltHint, "Voltage:");
@@ -78,7 +84,7 @@ public:
         // Current information layout
         auto currentLayout = lv_obj_create(root);
         lv_obj_remove_style_all(currentLayout);
-        lv_obj_set_size(currentLayout, lv_pct(100), 30);
+        lv_obj_set_size(currentLayout, lv_pct(100), LV_SIZE_CONTENT);
         lv_obj_add_style(currentLayout, &smallLayoutStyle, 0);
         auto currHint = lv_label_create(currentLayout);
         lv_label_set_text(currHint, "Current:");
@@ -86,6 +92,9 @@ public:
         lv_label_set_text(currentLabel, "810 mA");
     }
 
+    /**
+     * @brief Update the information displayed in the Battery tab.
+     */
     void updateTab() override
     {
         std::tuple<int, int, uint8_t> batteryInfo;
@@ -101,11 +110,11 @@ public:
             auto remainHours = static_cast<uint32_t>(remainPower / TYP_PWR_CONS); // Remaining hours based on typical power consumption
             if (remainHours > 24)
             {
-                lv_label_set_text_fmt(remainTimeLabel, "%d d %d h", remainHours / 24, remainHours % 24);
+                lv_label_set_text_fmt(remainTimeLabel, "%lu d %lu h", remainHours / 24, remainHours % 24);
             }
             else
             {
-                lv_label_set_text_fmt(remainTimeLabel, "%d h", remainHours);
+                lv_label_set_text_fmt(remainTimeLabel, "%lu h", remainHours);
             }
         }
     }

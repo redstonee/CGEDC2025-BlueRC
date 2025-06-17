@@ -16,3 +16,5 @@ constexpr auto SLEEP_TIMEOUT = 30 * 1000;
 
 // Battery capacity in mAh
 constexpr auto BATT_CAP = 500;
+// Typical daily-average power consumption in mA
+constexpr float TYP_PWR_CONS = 0.54;

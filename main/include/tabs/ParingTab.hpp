@@ -11,6 +11,9 @@ public:
     Pairing(lv_obj_t *parent)
         : Tab(parent, "Paring") {};
 
+    /**
+     * @brief Initialize the Paring tab.
+     */
     void initTab() override
     {
         lv_obj_set_size(root, lv_pct(100), lv_pct(100));
