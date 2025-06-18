@@ -42,8 +42,10 @@ void ControlTab::initTab()
         Device dev;
         dev.name = new char[8];
         snprintf(dev.name, 8, "AC %d", i + 1);
+        
         dev.temperature = 20 + i;                          // Example temperature
         dev.mode = static_cast<Device::DeviceMode>(i % 5); // Example mode
+        dev.online = !(i % 2);                             // Example online status
         _deviceList.push_back(dev);
     }
 
@@ -75,13 +77,13 @@ void ControlTab::initTab()
     lv_obj_set_style_text_font(titleLabel, &lv_font_montserrat_24, 0);
 
     // Configuration button
-    auto configButton = lv_button_create(appBar);
-    lv_obj_set_size(configButton, 26, 26);
-    auto buttonLabel = lv_label_create(configButton);
+    auto controlButton = lv_button_create(appBar);
+    lv_obj_set_size(controlButton, 26, 26);
+    auto buttonLabel = lv_label_create(controlButton);
     lv_obj_set_style_text_font(buttonLabel, &mode_logo_20, 0);
     lv_label_set_text(buttonLabel, LOGO_CFG);
     lv_obj_center(buttonLabel);
-    lv_obj_add_event_cb(configButton, configButtonHandler, LV_EVENT_CLICKED, this);
+    lv_obj_add_event_cb(controlButton, configButtonHandler, LV_EVENT_CLICKED, this);
 
     // The list view for displaying devices
     auto devListView = lv_list_create(root);
@@ -102,6 +104,14 @@ void ControlTab::initTab()
         lv_label_set_text(nameLabel, dev.name);
         lv_obj_set_width(nameLabel, lv_pct(20));
         lv_label_set_long_mode(nameLabel, LV_LABEL_LONG_MODE_SCROLL);
+        if (!dev.online)
+        {
+            auto offlineLabel = lv_label_create(listItem);
+            lv_label_set_text(offlineLabel, "Offline");
+            lv_obj_set_style_text_color(offlineLabel, lv_palette_main(LV_PALETTE_RED), 0);
+            continue; // Skip the rest of the item if the device is offline
+        }
+
         auto modeLabel = lv_label_create(listItem);
         lv_label_set_text(modeLabel, logos[static_cast<int>(dev.mode)]);
         lv_obj_set_style_text_font(modeLabel, &mode_logo_20, 0);
@@ -113,7 +123,7 @@ void ControlTab::initTab()
 
         auto checkbox = lv_checkbox_create(listItem);
         lv_obj_add_event_cb(checkbox, checkboxEventHandler, LV_EVENT_VALUE_CHANGED, &dev);
-        lv_checkbox_set_text(checkbox, "");
+        lv_checkbox_set_text_static(checkbox, "");
     }
 }
 

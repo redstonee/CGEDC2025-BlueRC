@@ -10,9 +10,9 @@ The protocol consists of a series of commands and responses that are exchanged
 between the `Remote Controller` and the `Air Conditioner`.
 
 ## Services
-- `0000fff9-0000-1000-8000-00805f9b34fb`: Identification Service
+- `0000fff8-0000-1000-8000-00805f9b34fb`: Identification Service
     - This service is used to identify the device while discovering it.
-- `d1537b56-6512-4a88-8ffc-cc7c49598710` : Control Service
+- `13b528f9-f225-4c8d-a3db-2c9ab927a22e` : Control Service
     - This service is used to control and monitor the air conditioner.
 
 ## Characteristics
