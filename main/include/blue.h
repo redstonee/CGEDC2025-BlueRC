@@ -2,30 +2,12 @@
 
 namespace blue
 {
-    /**
-     * @brief Initializes the bluetooth stack.
-     * 
-     */
     void init();
 
-    /**
-     * @brief Sends data over BLE.
-     * 
-     * @param data The data string to send.
-     */
-    void send(String data);
+    bool isScanning();
 
-    /**
-     * @brief Sends data over BLE.
-     * 
-     * @param data The data vector to send.
-     */
-    void send(std::vector<uint8_t> data);
+    void pauseScan();
+    void resumeScan();
 
-    /**
-     * @brief Checks if a device is connected.
-     * 
-     * @return true if a device is connected.
-     */
-    bool isConnected();
+    bool connectToDevice(uint8_t address[6]);
 }

@@ -32,11 +32,14 @@ struct Device
         SPD_HIGH,
     };
 
-    char *name;
+     char *name;
+     uint8_t address[6];
+
     uint8_t temperature;
     DeviceMode mode;
     Direction direction;
     FanSpeed speed;
+    bool online = false;
 
     bool selected = false; // Indicates if the device is selected in the UI
 };

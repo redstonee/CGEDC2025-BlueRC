@@ -6,7 +6,7 @@
 #include "GFX.h"
 #include "tabs/BatteryTab.hpp"
 #include "tabs/ControlTab.h"
-#include "tabs/ParingTab.hpp"
+#include "tabs/ParingTab.h"
 #include "config.h"
 
 // TODO: Use ESP_LCD components which supports DMA
@@ -110,7 +110,7 @@ namespace GFX
      *
      * @param arg Pointer to the array of Tab pointers
      */
-    void lvglTask(void *arg)
+    static void lvglTask(void *arg)
     {
         auto tabs = static_cast<Tab **>(arg);
         uint8_t nTabs = 0;
@@ -134,7 +134,7 @@ namespace GFX
      *
      * @param e The LVGL event data
      */
-    void onTabChanged(lv_event_t *e)
+    static void onTabChanged(lv_event_t *e)
     {
         auto tabview = lv_event_get_target_obj(e);
         auto tabIndex = lv_tabview_get_tab_active(tabview);
@@ -185,7 +185,7 @@ namespace GFX
 
         // Create the battery tab
         static ControlTab controlTab(tabview);
-        static Pairing pairingTab(tabview);
+        static PairingTab pairingTab(tabview);
         static BatteryTab batteryTab(tabview);
         static Tab *tabs[]{&controlTab, &pairingTab, &batteryTab, nullptr};
 
