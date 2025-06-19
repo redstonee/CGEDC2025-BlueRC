@@ -14,7 +14,6 @@ private:
 
     static lv_style_t horizonItemStyle;
 
-    static void scanButtonHandler(lv_event_t *e);
     static void pairButtonHandler(lv_event_t *e);
 
 public:

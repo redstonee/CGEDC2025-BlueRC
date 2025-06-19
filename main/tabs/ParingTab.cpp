@@ -48,41 +48,11 @@ void PairingTab::initTab()
     lv_label_set_text(titleLabel, "Paring");
     lv_obj_set_style_text_font(titleLabel, &lv_font_montserrat_24, 0);
 
-    // scanButton = lv_button_create(appBar);
-    // lv_obj_set_size(scanButton, 26, 26);
-    // auto buttonLabel = lv_label_create(scanButton);
-    // lv_obj_set_style_text_font(buttonLabel, &mode_logo_20, 0);
-    // lv_label_set_text(buttonLabel, LOGO_REFRESH);
-    // lv_obj_center(buttonLabel);
-    // lv_obj_add_event_cb(scanButton, scanButtonHandler, LV_EVENT_CLICKED, this);
-
     // The list view for displaying devices
     devListView = lv_list_create(root);
     lv_obj_set_flex_grow(devListView, 1);
     lv_obj_set_style_pad_row(devListView, 3, 0);
-    // scanSpinner = lv_spinner_create(root);
-    // lv_obj_set_size(scanSpinner, 32, 32);
-    // lv_obj_add_flag(scanSpinner, LV_OBJ_FLAG_HIDDEN); // Initially hidden
 }
-
-/**
- * @brief Event handler for the refresh button click event.
- *
- * This function creates a message box for configuring selected devices.
- *
- * @param e The LVGL event data
- */
-// void PairingTab::scanButtonHandler(lv_event_t *e)
-// {
-//     auto button = lv_event_get_target_obj(e);
-//     lv_obj_add_state(button, LV_STATE_DISABLED); // Disable the button to prevent multiple clicks
-
-//     auto pairingTab = static_cast<PairingTab *>(lv_event_get_user_data(e));
-//     lv_obj_clean(pairingTab->devListView); // Clear the existing list view
-
-//     lv_obj_add_flag(pairingTab->scanSpinner, LV_OBJ_FLAG_HIDDEN); // Initially hidden
-//     blue::startScan();                                            // Start the BLE scan
-// }
 
 void PairingTab::pairButtonHandler(lv_event_t *e)
 {
@@ -114,7 +84,7 @@ void PairingTab::updateTab()
     if (xQueueReceive(bleScanDeviceQueue, &device, 0))
     {
         // Create a new list item for the device
-        auto listItem = lv_list_add_text(devListView, device.name);
+        auto listItem = lv_obj_create(devListView);
         lv_obj_remove_style_all(listItem);
         lv_obj_set_size(listItem, lv_pct(100), 40);
         lv_obj_add_style(listItem, &horizonItemStyle, 0);
@@ -122,7 +92,7 @@ void PairingTab::updateTab()
         // Add the information labels
         auto nameLabel = lv_label_create(listItem);
         lv_label_set_text(nameLabel, device.name);
-        lv_obj_set_width(nameLabel, lv_pct(20));
+        lv_obj_set_width(nameLabel, lv_pct(60));
         lv_label_set_long_mode(nameLabel, LV_LABEL_LONG_MODE_SCROLL);
 
         deviceList.push_back(device);
@@ -139,10 +109,10 @@ void PairingTab::updateTab()
     {
         // If the semaphore is taken, the scan is complete
         lv_obj_clean(devListView); // Clear the existing list view
-        // for (auto &dev : deviceList)
-        // {
-        //     delete[] dev.name; // Free the device name memory
-        // }
+        for (auto &dev : deviceList)
+        {
+            delete[] dev.name; // Free the device name memory
+        }
         deviceList.clear(); // Clear the device list
     }
 

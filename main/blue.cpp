@@ -31,12 +31,15 @@ namespace blue
             if (advertisedDevice->isAdvertisingService(NimBLEUUID(ID_SERVICE_UUID)))
             {
                 ESP_LOGI(TAG, "Found server: %s\n", advertisedDevice->getName().c_str());
-                // Add to discovered devices
                 Device device;
                 device.name = new char[advertisedDevice->getName().length() + 1];
-                memcpy(device.address, advertisedDevice->getAddress().getNative(), sizeof(device.address));
+                for (auto i = 0; i < 6; i++)
+                {
+                    // It's reversed for some fucking reason, so we reverse it back
+                    device.address[i] = advertisedDevice->getAddress().getNative()[5 - i];
+                }
                 strcpy(device.name, advertisedDevice->getName().c_str());
-                if (xQueueSend(bleScanDeviceQueue, &advertisedDevice, 100) != pdTRUE)
+                if (xQueueSend(bleScanDeviceQueue, &device, 100) != pdTRUE)
                     ESP_LOGE(TAG, "Failed to send device to queue, queue is full");
             }
         }
@@ -78,13 +81,9 @@ namespace blue
         /** Pairing process complete, we can check the results in connInfo */
         void onAuthenticationComplete(const NimBLEConnInfo &connInfo) override
         {
-            if (!connInfo.isEncrypted())
-            {
-                ESP_LOGW(TAG, "Encrypt connection failed - disconnecting\n");
-                /** Find the client with the connection handle provided in connInfo */
-                NimBLEDevice::getClientByPeerAddress(connInfo.getAddress())->disconnect();
-                return;
-            }
+            auto result = connInfo.isEncrypted();
+            xQueueSend(blePairResultQueue, &result, 0);
+            NimBLEDevice::getClientByPeerAddress(connInfo.getAddress())->disconnect();
         }
     } clientCallbacks;
 
@@ -145,7 +144,13 @@ namespace blue
         bleScanner->setActiveScan(true);
 
         scanTimerHandle = xTimerCreate("BLE Scan Timer", pdMS_TO_TICKS(BLE_SCAN_PERIOD), pdTRUE, nullptr, startScan);
-        xTimerStart(scanTimerHandle, 0);
+        xTimerStart(scanTimerHandle, 10);
+
+        // while (!bleScanDevice)
+        // {
+        //     delay(100);
+        // }
+        // xTimerStop(scanTimerHandle, 0); // Stop the timer after the first scan
 
         // auto pClient = NimBLEDevice::createClient();
 
@@ -164,7 +169,7 @@ namespace blue
         // /** Set how long we are willing to wait for the connection to complete (milliseconds), default is 30000. */
         // pClient->setConnectTimeout(5 * 1000);
 
-        // if (!pClient->connect(discoveredDevices[0], true))
+        // if (!pClient->connect(bleScanDevice, true))
         // {
         //     /** Created a client but failed to connect, don't need to keep it as it has no data */
         //     NimBLEDevice::deleteClient(pClient);
@@ -189,9 +194,10 @@ namespace blue
         //     NimBLEDevice::deleteClient(pClient);
         //     return;
         // }
-        // auto modeVal = modeChr->readValue();                    // Read the initial value
-        // ESP_LOGI(TAG, "Mode: %u", modeVal.getValue<uint8_t>()); // Get the value as uint8_t
-        // modeChr->writeValue<uint8_t>(1);                        // Set the mode to 1
+
+        // modeChr->writeValue<uint8_t>(1);
+        // delay(500);
+        // modeChr->writeValue<uint8_t>(0);
 
         // pClient->disconnect();               // Disconnect the client after use
         // NimBLEDevice::deleteClient(pClient); // Delete the client to free resources
@@ -208,20 +214,22 @@ namespace blue
                     {
                         uint8_t address[6];
                         memcpy(address, arg, sizeof(address));
-
                         auto pClient = NimBLEDevice::createClient();
                         pClient->setClientCallbacks(&clientCallbacks, false);
                         pClient->setConnectionParams(12, 12, 0, 150);
                         /** Set how long we are willing to wait for the connection to complete (milliseconds), default is 30000. */
                         pClient->setConnectTimeout(5 * 1000);
                         auto result = pClient->connect(NimBLEAddress(address));
-                        NimBLEDevice::deleteClient(pClient);
-
-                        xQueueSend(blePairResultQueue, &result, 0); // Send failure to queue
-                        vTaskDelete(nullptr);                       // Exit the task
+                        if (!result)
+                        {
+                            // Failed to connect
+                            NimBLEDevice::deleteClient(pClient);
+                            xQueueSend(blePairResultQueue, &result, 0);
+                        }
+                        vTaskDelete(nullptr); // Exit the task
                     },
                     "BLE Connect Task", 4096, address, 5, nullptr);
-        return true; 
+        return true;
     }
 
 } // namespace blue
