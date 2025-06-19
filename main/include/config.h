@@ -20,5 +20,7 @@ constexpr auto BATT_CAP = 500;
 constexpr float TYP_PWR_CONS = 0.54;
 
 // BLE scan time in milliseconds
-constexpr auto BLE_SCAN_TIME = 1000;
+constexpr auto BLE_SCAN_TIME = 2000;
 constexpr auto BLE_SCAN_PERIOD = 5000;
+constexpr auto BLE_CONN_TIMEOUT = 3000;
+constexpr auto MAX_SAVED_DEVICES = 100;

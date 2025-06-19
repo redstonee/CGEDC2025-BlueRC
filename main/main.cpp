@@ -15,6 +15,7 @@
 // WARNING: Global variables, use with CAUTION!
 QueueHandle_t batteryInfoQueue;
 QueueHandle_t deviceControlQueue;
+QueueHandle_t controlResultQueue; // For control results feeding back to the UI
 
 constexpr auto TAG = "Main";
 
@@ -73,6 +74,7 @@ extern "C" void app_main()
     // Create a queue for battery info
     batteryInfoQueue = xQueueCreate(3, sizeof(std::tuple<int, int, uint8_t>));
     deviceControlQueue = xQueueCreate(8, sizeof(Device));
+    controlResultQueue = xQueueCreate(1, sizeof(Device));
 
     GFX::init();
     blue::init();
@@ -122,14 +124,21 @@ extern "C" void app_main()
         }
 
         Device deviceToControl;
-        while (xQueueReceive(deviceControlQueue, &deviceToControl, 0))
+        if (xQueuePeek(deviceControlQueue, &deviceToControl, 0) == pdTRUE)
         {
-            ESP_LOGI(TAG, "%s: mode: %d, temperature: %d, speed : %d, direction: %d",
-                     deviceToControl.name,
-                     static_cast<int>(deviceToControl.mode),
-                     deviceToControl.temperature,
-                     static_cast<int>(deviceToControl.speed),
-                     static_cast<int>(deviceToControl.direction));
+            bool result = true;
+            while (xQueueReceive(deviceControlQueue, &deviceToControl, 0))
+            {
+                ESP_LOGI(TAG, "%s: mode: %d, temperature: %d, speed : %d, direction: %d",
+                         deviceToControl.name,
+                         static_cast<int>(deviceToControl.mode),
+                         deviceToControl.temperature,
+                         static_cast<int>(deviceToControl.speed),
+                         static_cast<int>(deviceToControl.direction));
+
+                result &= blue::sendControl(deviceToControl);
+            }
+            xQueueSend(controlResultQueue, &result, 100);
         }
 
         delay(1000);

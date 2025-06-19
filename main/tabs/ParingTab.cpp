@@ -8,7 +8,7 @@ extern "C"
 }
 
 // WARNING: Global variables, use with CAUTION!
-extern QueueHandle_t bleScanDeviceQueue;
+extern QueueHandle_t bleScanUnsavedDeviceQueue;
 extern QueueHandle_t blePairResultQueue;
 extern SemaphoreHandle_t bleScanStartSemaphore;
 
@@ -62,18 +62,20 @@ void PairingTab::pairButtonHandler(lv_event_t *e)
     auto device = static_cast<Device *>(lv_obj_get_user_data(button));
 
     pairingTab->pairingMsgBox = lv_msgbox_create(nullptr);
-    lv_msgbox_add_title(pairingTab->pairingMsgBox, "Paring");
+    lv_msgbox_add_title(pairingTab->pairingMsgBox, ("Paring " + String(device->name)).c_str());
+    lv_obj_set_user_data(pairingTab->pairingMsgBox, device); // Store the device in the message box
+
     pairingTab->pairingSpinner = lv_spinner_create(pairingTab->pairingMsgBox);
     lv_obj_set_size(pairingTab->pairingSpinner, 40, 40);
     lv_obj_center(pairingTab->pairingSpinner);
 
-    blue::connectToDevice(device->address);
+    blue::tryToPairDevice(device->address);
 }
 
 void PairingTab::updateTab()
 {
     // Update logic for the Paring tab can be implemented here.
-    if ((!bleScanDeviceQueue) || (!bleScanStartSemaphore) || (!blePairResultQueue))
+    if ((!bleScanUnsavedDeviceQueue) || (!bleScanStartSemaphore) || (!blePairResultQueue))
     {
         // If the queues or semaphores are not initialized, do nothing
         return;
@@ -81,7 +83,7 @@ void PairingTab::updateTab()
 
     static std::vector<Device> deviceList;
     Device device;
-    if (xQueueReceive(bleScanDeviceQueue, &device, 0))
+    if (xQueueReceive(bleScanUnsavedDeviceQueue, &device, 0))
     {
         // Create a new list item for the device
         auto listItem = lv_obj_create(devListView);
@@ -109,10 +111,10 @@ void PairingTab::updateTab()
     {
         // If the semaphore is taken, the scan is complete
         lv_obj_clean(devListView); // Clear the existing list view
-        for (auto &dev : deviceList)
-        {
-            delete[] dev.name; // Free the device name memory
-        }
+        // for (auto &dev : deviceList)
+        // {
+        //     delete[] dev.name; // Free the device name memory
+        // }
         deviceList.clear(); // Clear the device list
     }
 
@@ -136,6 +138,9 @@ void PairingTab::updateTab()
         {
             lv_label_set_text(resultLabel, "Pairing successful!");
             lv_obj_set_style_text_color(resultLabel, lv_palette_main(LV_PALETTE_GREEN), 0);
+
+            auto device = static_cast<Device *>(lv_obj_get_user_data(pairingMsgBox));
+            blue::addDevice(device->name, device->address); // Save the device after successful pairing
         }
         else
         {

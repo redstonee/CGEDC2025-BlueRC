@@ -9,6 +9,9 @@
 #include "tabs/ParingTab.h"
 #include "config.h"
 
+// For testing purposes
+#include "blue.h"
+
 // TODO: Use ESP_LCD components which supports DMA
 
 namespace GFX
@@ -188,6 +191,17 @@ namespace GFX
         static PairingTab pairingTab(tabview);
         static BatteryTab batteryTab(tabview);
         static Tab *tabs[]{&controlTab, &pairingTab, &batteryTab, nullptr};
+
+        // For testing purposes
+        auto tabBar = lv_tabview_get_tab_bar(tabview);
+        auto button1 = lv_obj_get_child_by_type(tabBar, 0, &lv_button_class);
+        lv_obj_add_event_cb(button1, [](lv_event_t *e)
+                            {
+                                ESP_LOGI("GFX", "Tab 1 button long pressed, clearing saved devices");
+                                blue::clearSavedDevices();
+                                esp_restart(); // Restart the device to apply changes
+                            },
+                            LV_EVENT_LONG_PRESSED, nullptr);
 
         xTaskCreate(lvglTask, "lvglTask", 8192, tabs, 5, NULL); /*Create a task to handle LVGL events*/
     }
